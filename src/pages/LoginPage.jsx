@@ -1,14 +1,30 @@
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import { useState } from "react";
 
 const LoginPage = () => {
+
+  const navigate = useNavigate();
+  const successNotify = (msg) => {
+    toast.success(msg, {
+      closeButton: true,
+      className: "border border-green-500 rounded-lg",
+    });
+  };
+
+  const errorNotify = (msg) => {
+    toast.error(msg, {
+      closeButton: true,
+      className: "border border-red-500 rounded-lg",
+    });
+  };
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [error, setError] = useState("");
 
   const handleFormInput = (e) => {
     const { name, value } = e.target;
@@ -17,27 +33,18 @@ const LoginPage = () => {
       ...formData,
       [name]: value,
     });
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
-
-    setError("");
   };
 
   const submitForm = async (e) => {
+
     e.preventDefault();
-
-    setErrors({});
-    setError("");
-
     try {
       const response = await fetch("http://127.0.0.1:8000/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+         
         },
         body: JSON.stringify(formData),
       });
@@ -46,22 +53,25 @@ const LoginPage = () => {
 
       if (!response.ok) {
         if (response.status === 422) {
-          setErrors(res.errors || {});
+          setErrors(res.errors || []);
         } else {
-          setError(res.message || "Something went wrong!");
+          errorNotify(res.message);
         }
 
         return;
       }
 
       if (res.status === true) {
-        console.log("Login successful", res.data);
+        successNotify(res.message);
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("authUser", JSON.stringify(res.data.user));
+        navigate("/dashboard");
       } else {
-        setError(res.message || "Login failed");
+        errorNotify(res.message);
       }
     } catch (err) {
       console.error(err);
-      setError("Server connection failed!");
+      errorNotify(err);
     }
   };
 
@@ -104,9 +114,6 @@ const LoginPage = () => {
                 )}
 
                 <br />
-
-                {error && <div className="alert alert-danger">{error}</div>}
-
                 <button className="btn w-100 btn-primary">Login</button>
               </form>
 
@@ -119,6 +126,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

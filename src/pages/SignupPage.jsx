@@ -1,4 +1,83 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+
 const SignupPage = () => {
+  const successNotify = (msg) => {
+    toast.success(msg, {
+      closeButton: true,
+      className: "border border-green-500 rounded-lg",
+    });
+  };
+
+  const errorNotify = (msg) => {
+    toast.error(msg, {
+      closeButton: true,
+      className: "border border-red-500 rounded-lg",
+    });
+  };
+
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    password_confirmation: "",
+  });
+
+  const [errors, setErrors] = useState([]);
+
+  const handleForm = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const submitForm = async (e) => {
+    const token = localStorage.getItem("token");
+
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          setErrors(res.errors || []);
+        } else {
+          errorNotify(res.message);
+        }
+
+        return;
+      }
+
+      if (res.status === true) {
+        successNotify(res.message);
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("authUser", JSON.stringify(res.data.user));
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      }
+    } catch (err) {
+      errorNotify(err.message);
+    }
+  };
+
   return (
     <>
       <div className="container">
@@ -8,46 +87,75 @@ const SignupPage = () => {
               <div className="card-body">
                 <h4>Sign Up</h4>
                 <hr />
-                <form>
+                <form onSubmit={submitForm}>
                   <div className="mb-3">
                     <label>Name</label>
                     <input
-                      v-model="name"
-                      placeholder="First Name"
+                      placeholder="Name"
                       className="form-control"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleForm}
                     />
-                    <div className="text-danger">Dynamic</div>
+                    {errors.name && (
+                      <div className="text-danger">{errors.name}</div>
+                    )}
                   </div>
 
                   <div className="mb-3">
                     <label>Email Address</label>
                     <input
-                      v-model="email"
-                      placeholder="User Email"
+                      placeholder="Email"
                       type="email"
                       className="form-control"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleForm}
                     />
-                    <div className="text-danger">Dynamic</div>
+                    {errors.email && (
+                      <div className="text-danger">{errors.email}</div>
+                    )}
+                  </div>
+
+                  <div className="mb-3">
+                    <label>Phone</label>
+                    <input
+                      placeholder="Phone"
+                      type="text"
+                      name="phone"
+                      className="form-control"
+                      value={formData.phone}
+                      onChange={handleForm}
+                    />
+                    {errors.phone && (
+                      <div className="text-danger">{errors.phone}</div>
+                    )}
                   </div>
 
                   <div className="mb-3">
                     <label>Password</label>
                     <input
-                      v-model="password"
-                      placeholder="User Password"
+                      placeholder="Password"
                       type="password"
+                      name="password"
                       className="form-control"
+                      value={formData.password}
+                      onChange={handleForm}
                     />
-                    <div className="text-danger">Dynamic</div>
+                    {errors.password && (
+                      <div className="text-danger">{errors.password}</div>
+                    )}
                   </div>
 
                   <div className="mb-3">
                     <label>Confirm Password</label>
                     <input
-                      v-model="password_confirm"
                       placeholder="Confirm Password"
                       type="password"
                       className="form-control"
+                      name="password_confirmation"
+                      value={formData.password_confirmation}
+                      onChange={handleForm}
                     />
                   </div>
 
@@ -60,6 +168,7 @@ const SignupPage = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </>
   );
 };
