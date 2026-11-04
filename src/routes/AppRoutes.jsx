@@ -1,21 +1,16 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import LoginPage from '@/features/auth/pages/LoginPage'
-import RegisterPage from '@/features/auth/pages/RegisterPage'
-import ProtectedRoute from './ProtectedRoute'
-// import { ProductsPage } from '@/features/products'
+import {Routes, Route} from 'react-router-dom'
+import LoginPage from '@/pages/LoginPage'
+import SignupPage from '@/pages/SignupPage'
 
-export default function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+const AppRoutes = () => {
+    return (
+        <div>
+             <Routes>
+                <Route path="/" element={<LoginPage/>} />
+                <Route path="/signup" element={<SignupPage/>} />
+             </Routes>
+        </div>
+    );
+};
 
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Navigate to="/products" replace />} />
-        {/* <Route path="/products" element={<ProductsPage />} /> */}
-      </Route>
-
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
-}
+export default AppRoutes;
