@@ -65,7 +65,9 @@ const LoginPage = () => {
         successNotify(res.message);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("authUser", JSON.stringify(res.data.user));
-        navigate("/dashboard");
+        setTimeout(() => {
+          navigate("/dashboard");
+        },1000)
       } else {
         errorNotify(res.message);
       }
