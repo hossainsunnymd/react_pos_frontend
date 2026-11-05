@@ -54,11 +54,10 @@ const LoginPage = () => {
       if (!response.ok) {
         if (response.status === 422) {
           setErrors(res.errors || []);
+          return;
         } else {
-          errorNotify(res.message);
+          throw new Error(res.message);
         }
-
-        return;
       }
 
       if (res.status === true) {

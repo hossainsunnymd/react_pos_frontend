@@ -4,6 +4,7 @@ import LoginPage from '@/pages/auth/LoginPage'
 import SignupPage from '@/pages/auth/SignupPage'
 import Dashboard from '@/pages/DashboardPage'
 import Users from '@/pages/users/Users'
+import UserSave from '@/pages/users/UserSave'
 
 
 
@@ -16,6 +17,7 @@ const AppRoutes = () => {
                 <Route element={<ProtectedRoute/>}>
                     <Route path="/dashboard" element={<Dashboard/>} />
                     <Route path="/users" element={<Users/>} />
+                    <Route path="/users/:id" element={<UserSave/>} />
                 </Route>
              </Routes>
         </div>

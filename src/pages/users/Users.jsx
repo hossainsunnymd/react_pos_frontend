@@ -1,9 +1,26 @@
 import { useEffect,useState } from "react";
+import { NavLink } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import PanelLayout from "../../components/layouts/PanelLayout";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const successNotify = (msg) => {
+    toast.success(msg, {
+      closeButton: true,
+      className: "border border-green-500 rounded-lg",
+    });
+  };
+
+  const errorNotify = (msg) => {
+    toast.error(msg, {
+      closeButton: true,
+      className: "border border-red-500 rounded-lg",
+    });
+  };
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -38,8 +55,43 @@ const Users = () => {
     fetchUsers();
   }, []);
 
+  const handleDelete=async (id)=>{
+    if(confirm('Are you sure to delete this user?')){
+      const token =localStorage.getItem('token');
+
+      try{
+        const response =await fetch(`http://127.0.0.1:8000/api/users/${id}`,{
+          method:"DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const res=await response.json();
+        if(!response.ok){
+          throw new Error(res.message);
+        }
+
+        if(res.status==true){
+          successNotify(res.message);
+            setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+        }else{
+          throw new Error(res.message);
+
+        }
+
+      }catch(err){
+        errorNotify(err.message);
+        console.error(err.message);
+      }
+
+    }
+  }
+
   return (
     <PanelLayout>
+      <ToastContainer />
       <div className="content">
         <div className="container-fluid">
           <div className="row justify-content-center">
@@ -48,7 +100,7 @@ const Users = () => {
                 <div className="d-flex justify-content-between align-items-center">
                   <h4>Users</h4>
 
-                  <button className="btn btn-sm btn-dark">Add User</button>
+                  <NavLink to={`/users/${0}`} className="btn btn-sm btn-dark">Add User</NavLink>
                 </div>
               </div>
 
@@ -74,13 +126,13 @@ const Users = () => {
                       <td>{user.email}</td>
                       <td>{user.phone}</td>
                       <td>
-                        <button className="btn btn-sm btn-primary me-1">
+                        <NavLink to={`/users/${user.id}`} className="btn btn-sm btn-primary me-1">
                           Edit
-                        </button>
+                        </NavLink>
 
                         <button
                           className="btn btn-sm btn-danger"
-                        //   onClick={() => handleDelete(user.id)}
+                          onClick={() => handleDelete(user.id)}
                         >
                           Delete
                         </button>
