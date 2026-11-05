@@ -50,7 +50,7 @@ const CategorySave = () => {
 
     const controller = new AbortController();
 
-    const getExistingUser = async () => {
+    const getExistingCategory = async () => {
       const token = localStorage.getItem("token");
 
       setFetching(true);
@@ -87,7 +87,7 @@ const CategorySave = () => {
       }
     };
 
-    getExistingUser();
+    getExistingCategory();
 
     return () => controller.abort();
   }, [id]);

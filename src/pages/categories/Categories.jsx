@@ -116,7 +116,7 @@ const Categories = () => {
                     <thead className="table-light">
                       <tr>
                         <th>ID</th>
-                        <th>Category</th>
+                        <th>Name</th>
                         <th>Action</th>
                       </tr>
                     </thead>

@@ -52,7 +52,7 @@ const CustomerSave = () => {
 
     const controller = new AbortController();
 
-    const getExistingUser = async () => {
+    const getExistingCustomer = async () => {
       const token = localStorage.getItem("token");
 
       setFetching(true);
@@ -91,7 +91,7 @@ const CustomerSave = () => {
       }
     };
 
-    getExistingUser();
+    getExistingCustomer();
 
     return () => controller.abort();
   }, [id]);
