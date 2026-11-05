@@ -7,6 +7,8 @@ import Users from '@/pages/users/Users'
 import UserSave from '@/pages/users/UserSave'
 import Customers from '@/pages/customers/Customers'
 import CustomerSave from '@/pages/customers/CustomerSave'
+import Categories from '@/pages/categories/Categories'
+import CategorySave from '@/pages/categories/CategorySave'
 
 
 
@@ -23,6 +25,8 @@ const AppRoutes = () => {
                     <Route path="/users/:id" element={<UserSave/>} />
                     <Route path="/customers" element={<Customers/>} />
                     <Route path="/customers/:id" element={<CustomerSave/>} />
+                    <Route path="/categories" element={<Categories/>} />
+                    <Route path="/categories/:id" element={<CategorySave/>} />
                 </Route>
              </Routes>
         </div>

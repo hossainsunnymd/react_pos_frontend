@@ -58,6 +58,11 @@ const PanelLayout = ({ children }) => {
           <i className="bi bi-speedometer2 side-bar-item-icon"></i>
           <span>Customers</span>
         </NavLink>
+
+        <NavLink to="/categories" className="side-bar-item mt-2">
+          <i className="bi bi-speedometer2 side-bar-item-icon"></i>
+          <span>Categories</span>
+        </NavLink>
       </div>
       {children}
     </>

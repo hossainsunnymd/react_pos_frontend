@@ -108,12 +108,6 @@ const CustomerSave = () => {
 
     const method = id != 0 ? "PUT" : "POST";
 
-    const payload = { ...formData };
-
-    if (id && !payload.password) {
-      delete payload.password;
-      delete payload.password_confirmation;
-    }
 
     setLoading(true);
     setErrors({});
@@ -126,7 +120,7 @@ const CustomerSave = () => {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
       const res = await response.json();

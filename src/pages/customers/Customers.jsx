@@ -36,11 +36,11 @@ const Customers = () => {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch users");
+          throw new Error("Failed to fetch customers");
         }
 
         const res = await response.json();
-        console.log(res);
+       
         if (res.status === true) {
           setCustomers(res.data.data);
           setLoading(false);
