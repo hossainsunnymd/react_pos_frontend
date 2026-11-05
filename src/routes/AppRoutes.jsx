@@ -5,6 +5,9 @@ import SignupPage from '@/pages/auth/SignupPage'
 import Dashboard from '@/pages/DashboardPage'
 import Users from '@/pages/users/Users'
 import UserSave from '@/pages/users/UserSave'
+import Customers from '@/pages/customers/Customers'
+import CustomerSave from '@/pages/customers/CustomerSave'
+
 
 
 
@@ -18,6 +21,8 @@ const AppRoutes = () => {
                     <Route path="/dashboard" element={<Dashboard/>} />
                     <Route path="/users" element={<Users/>} />
                     <Route path="/users/:id" element={<UserSave/>} />
+                    <Route path="/customers" element={<Customers/>} />
+                    <Route path="/customers/:id" element={<CustomerSave/>} />
                 </Route>
              </Routes>
         </div>
