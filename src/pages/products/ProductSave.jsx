@@ -15,11 +15,13 @@ const ProductSave = () => {
     price: "",
     qty: "",
     category_id: "",
+    image: null,
   });
 
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [preview, setPreview] = useState(null);
 
   // Notifications
   const successNotify = (msg) => {
@@ -49,6 +51,15 @@ const ProductSave = () => {
       ...prev,
       [name]: null,
     }));
+  };
+
+  const handleImage = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      image: e.target.files[0],
+    }));
+
+    setPreview(URL.createObjectURL(e.target.files[0]));
   };
 
   useEffect(() => {
@@ -116,6 +127,11 @@ const ProductSave = () => {
           qty: res.data.qty || "",
           category_id: res.data.category.id || "",
         }));
+
+        if(res.data.image){
+          setPreview(res.data.image);
+        }
+
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error(error);
@@ -148,15 +164,23 @@ const ProductSave = () => {
     setLoading(true);
     setErrors({});
 
+    const data=new FormData();
+
+    data.append("name", formData.name);
+    data.append("description", formData.description);
+    data.append("price", formData.price);
+    data.append("qty", formData.qty);
+    data.append("category_id", formData.category_id);
+    data.append("image", formData.image);
+
     try {
       const response = await fetch(apiURL, {
         method,
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: data,
       });
 
       const res = await response.json();
@@ -294,6 +318,34 @@ const ProductSave = () => {
                         <div className="text-danger">{getError("qty")}</div>
                       )}
                     </div>
+                    <div className="mb-3">
+                      <input
+                        className="form-control"
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        onChange={handleImage}
+                      />
+
+                      {getError("image") && (
+                        <div className="text-danger">{getError("image")}</div>
+                      )}
+                    </div>
+
+                    {preview && (
+                      <div className="mb-3">
+                        <img
+                          src={preview}
+                          alt={formData.name || "Product Image"}
+                          className="img-thumbnail"
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </div>
+                    )}
                     <button
                       type="submit"
                       disabled={loading}
