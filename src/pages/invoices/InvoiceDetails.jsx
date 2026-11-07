@@ -17,7 +17,7 @@ const InvoiceDetails = (props) =>
               <h5 className="modal-title" id="invoice-details-title">
                 Invoice Details
               </h5>
-              <p className="text-muted mb-0">Customer: Customer name</p>
+              <p className="text-muted mb-0">Customer: {props.invoice.customer.name}</p>
             </div>
             <button type="button" className="btn-close" aria-label="Close" />
           </div>
