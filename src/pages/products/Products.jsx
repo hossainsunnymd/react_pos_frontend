@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import PanelLayout from "../../components/layouts/PanelLayout";
 
-
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +39,6 @@ const Products = () => {
         }
 
         const res = await response.json();
-
-       console.log(res);
 
         if (res.status === true) {
           setProducts(res.data.data);
@@ -134,7 +131,15 @@ const Products = () => {
                         products.map((product) => (
                           <tr key={product.id}>
                             <td>{product.id}</td>
-                            <td>{product.image && (<img src={product.image}  style={{width: "50px", height: "50px"}} alt="img"/>)}</td>
+                            <td>
+                              {product.image && (
+                                <img
+                                  src={product.image}
+                                  style={{ width: "50px", height: "50px" }}
+                                  alt="img"
+                                />
+                              )}
+                            </td>
                             <td>{product.name}</td>
                             <td>{product.category.name}</td>
                             <td>{product.description}</td>

@@ -11,6 +11,8 @@ import Categories from '@/pages/categories/Categories'
 import CategorySave from '@/pages/categories/CategorySave'
 import Products from '../pages/products/Products'
 import ProductSave from '../pages/products/ProductSave'
+import Invoices from '../pages/invoices/Invoices'
+import InvoiceSave from '../pages/invoices/InvoiceSave'
 
 
 
@@ -31,6 +33,8 @@ const AppRoutes = () => {
                     <Route path="/categories/:id" element={<CategorySave/>} />
                     <Route path="/products" element={<Products/>} />
                     <Route path="/products/:id" element={<ProductSave/>} />
+                    <Route path="/invoices" element={<Invoices/>} />
+                    <Route path="/invoice-save" element={<InvoiceSave/>} />
                 </Route>
              </Routes>
         </div>
