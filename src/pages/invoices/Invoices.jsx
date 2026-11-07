@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import PanelLayout from "../../components/layouts/PanelLayout";
+import InvoiceDetails from "./InvoiceDetails";
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [invoice,setInvoice] = useState({});
 
   const successNotify = (msg) => {
     toast.success(msg, {
@@ -39,6 +42,7 @@ const Invoices = () => {
         }
 
         const res = await response.json();
+        
         if (res.status === true) {
           setInvoices(res.data.data);
           setLoading(false);
@@ -88,9 +92,19 @@ const Invoices = () => {
     }
   };
 
+  const showInvoiceDetails = (id) => {
+    setInvoice(invoices.find((invoice) => invoice.id === id));
+    setShowModal(true);
+  };
+
+  const closeInvoiceDetails = (value) => {
+    setShowModal(value);
+  };
+
   return (
     <PanelLayout>
       <ToastContainer />
+      <InvoiceDetails showModal={showModal} invoice={invoice} closeInvoiceDetails={closeInvoiceDetails}  />
       <div className="content">
         <div className="container-fluid">
           <div className="row justify-content-center">
@@ -114,7 +128,11 @@ const Invoices = () => {
                     <thead className="table-light">
                       <tr>
                         <th>ID</th>
-                        <th>Name</th>
+                        <th>Customer Name</th>
+                        <th>Vat</th>                 
+                        <th>Discount</th>                 
+                        <th>Total</th>                 
+                        <th>Payable</th>                 
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -124,14 +142,18 @@ const Invoices = () => {
                         invoices.map((invoice) => (
                           <tr key={invoice.id}>
                             <td>{invoice.id}</td>
-                            <td>{invoice.name}</td>
+                            <td>{invoice.customer.name}</td>
+                            <td>{invoice.vat}</td>
+                            <td>{invoice.discount}</td>
+                            <td>{invoice.total}</td>
+                            <td>{invoice.payable}</td>
                             <td>
-                              <NavLink
-                                to={`/invoices-save`}
+                              <button
+                                onClick={() => showInvoiceDetails(invoice.id)}
                                 className="btn btn-sm btn-primary me-1"
                               >
-                                Edit
-                              </NavLink>
+                                view
+                              </button>
 
                               <button
                                 className="btn btn-sm btn-danger"

@@ -1,6 +1,21 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import PanelLayout from "../../components/layouts/PanelLayout";
 import { useEffect, useState, useReducer } from "react";
+import { ToastContainer, toast } from "react-toastify";
+
+const successNotify = (msg) => {
+  toast.success(msg, {
+    closeButton: true,
+    className: "border border-green-500 rounded-lg",
+  });
+};
+
+const errorNotify = (msg) => {
+  toast.error(msg, {
+    closeButton: true,
+    className: "border border-red-500 rounded-lg",
+  });
+};
 
 const initialState = {
   productForQuantity: false,
@@ -14,13 +29,8 @@ const initialState = {
     payable: 0,
     products: [],
   },
-  invoiceProduct: {
-    product_id: "",
-    sale_price: "",
-    qty: "",
-  },
-
   products: [],
+  customer: {},
 };
 
 const reducer = (state, action) => {
@@ -52,7 +62,7 @@ const reducer = (state, action) => {
       qty: Number(state.quantity),
       total: Number(action.payload.price) * Number(state.quantity),
     };
-    const data= {
+    const data = {
       ...state,
       invoice: {
         ...state.invoice,
@@ -60,45 +70,68 @@ const reducer = (state, action) => {
           ...state.invoice.products,
           {
             product_id: action.payload.id,
-            sale_price: Number(action.payload.price) * Number(action.payload.quantity),
+            sale_price: Number(action.payload.price) * Number(state.quantity),
             qty: Number(state.quantity),
           },
         ],
-
-        total: state.invoice.products.reduce(
-          (acc, item) => acc + item.sale_price,
-          0,
-        ),
-        discount: Number(state.invoice.total) * 0.5,
-        vat: Number(state.invoice.total) * 0.15,
-        payable: Number(state.invoice.total) + Number(state.invoice.vat) - Number(state.invoice.discount),
       },
-
       products: [...state.products, newProduct],
 
       productForQuantity: false,
     };
-    console.log(state.invoice.products);
+
+    const newTotal = data.invoice.products.reduce(
+      (acc, item) => acc + item.sale_price,
+      0,
+    );
+    const vat = newTotal * 0.15;
+    const discount = newTotal * 0.05;
+    const payable = newTotal + vat - discount;
+    data.invoice.total = newTotal;
+    data.invoice.vat = vat;
+    data.invoice.discount = discount;
+    data.invoice.payable = payable;
+
     return data;
   }
 
   if (action.type == "REMOVE PRODUCT") {
-    return {
+    const data = {
       ...state,
-      products: state.products.filter((item) => item.id !== action.payload),
+      products: state.products.filter(
+        (product) => product.id !== action.payload,
+      ),
       invoice: {
         ...state.invoice,
         products: state.invoice.products.filter(
-          (item) => item.product_id !== action.payload,
+          (product) => product.product_id !== action.payload,
         ),
-        total: state.invoice.products.reduce(
-          (acc, item) => acc + item.sale_price,
-          0,
-        ),
-        discount: state.total * 0.5,
-        vat: state.total * 0.15,
-        payable: state.total + state.vat - state.discount,
       },
+    };
+
+    const newTotal = data.invoice.products.reduce(
+      (acc, item) => acc + item.sale_price,
+      0,
+    );
+    const vat = newTotal * 0.15;
+    const discount = newTotal * 0.05;
+    const payable = newTotal + vat - discount;
+    data.invoice.total = newTotal;
+    data.invoice.vat = vat;
+    data.invoice.discount = discount;
+    data.invoice.payable = payable;
+
+    return data;
+  }
+
+  if (action.type == "ADD CUSTOMER") {
+    return {
+      ...state,
+      invoice: {
+        ...state.invoice,
+        customer_id: action.payload.id,
+      },
+      customer: action.payload,
     };
   }
 };
@@ -108,6 +141,7 @@ const InvoiceSave = () => {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -173,10 +207,48 @@ const InvoiceSave = () => {
     fetchProducts();
   }, []);
 
+  const createInvoice = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://localhost:8000/api/invoices", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(state.invoice),
+      });
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          throw new Error(res.message);
+        } else {
+          throw new Error(res.message);
+        }
+      }
+
+      if (res.status === true) {
+        successNotify(res.message);
+        setTimeout(() => {
+          navigate("/invoices");
+        }, 1000);
+      } else {
+        throw new Error(res.message);
+      }
+    } catch (e) {
+      errorNotify(e.message);
+      console.error(e);
+    }
+  };
+
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
     <PanelLayout>
+      <ToastContainer />
       <div className="content">
         <div className="container-fluid">
           <div className="card p-3 mb-3">
@@ -323,7 +395,15 @@ const InvoiceSave = () => {
                             <td>{customer.name}</td>
                             <td>{customer.phone}</td>
                             <td>
-                              <button className="btn btn-sm btn-primary">
+                              <button
+                                className="btn btn-sm btn-primary"
+                                onClick={() =>
+                                  dispatch({
+                                    type: "ADD CUSTOMER",
+                                    payload: customer,
+                                  })
+                                }
+                              >
                                 Select
                               </button>
                             </td>
@@ -338,8 +418,17 @@ const InvoiceSave = () => {
           </div>
 
           <section className="card mb-3">
-            <div className="card-header bg-white">
-              <h5 className="mb-0">Selected products</h5>
+            <div className="d-flex justify-content-between">
+              <div className="card-header bg-white">
+                <h5 className="mb-0">Selected products</h5>
+              </div>
+              {state.customer?.id && (
+                <div className="card-header bg-white">
+                  <h5 className="mb-0">Selected Custmer</h5>
+                  <p>Name : {state.customer.name}</p>
+                  <p>Phone : {state.customer.phone}</p>
+                </div>
+              )}
             </div>
             <div className="table-responsive">
               <table className="table table-bordered table-hover align-middle mb-0">
@@ -349,7 +438,6 @@ const InvoiceSave = () => {
                     <th scope="col">Product</th>
                     <th scope="col">Unit price</th>
                     <th scope="col">Quantity</th>
-                    <th scope="col">Discount</th>
                     <th scope="col">Total</th>
                     <th scope="col">Action</th>
                   </tr>
@@ -362,7 +450,6 @@ const InvoiceSave = () => {
                         <td>{product.name}</td>
                         <td>{product.price}</td>
                         <td>{product.qty}</td>
-                        <td>{product.discount}</td>
                         <td>{product.total}</td>
                         <td>
                           <button
@@ -415,7 +502,11 @@ const InvoiceSave = () => {
             <NavLink to="/invoices" className="btn btn-outline-secondary">
               Cancel
             </NavLink>
-            <button type="button" className="btn btn-primary" disabled>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={createInvoice}
+            >
               Save Invoice
             </button>
           </div>
@@ -485,9 +576,17 @@ const InvoiceSave = () => {
                   <button
                     type="button"
                     className="btn btn-primary"
-                    onClick={() =>
-                      dispatch({ type: "ADD PRODUCT", payload: state.product })
-                    }
+                    onClick={() => {
+                      const exists = state.products.some(
+                        (item) => item.id === state.product.id,
+                      );
+
+                      if (exists) {
+                        errorNotify("Product already added");
+                        return;
+                      }
+                      dispatch({ type: "ADD PRODUCT", payload: state.product });
+                    }}
                   >
                     Confirm
                   </button>
